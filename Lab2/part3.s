@@ -46,10 +46,10 @@
          .word 0
       
   OUT_NEGATIVE:
-      .skip                          # Reserve space for 10 output words
+      .skip 40                         # Reserve space for 10 output words
       
   OUT_POSITIVE:
-      .skip                          # Reserve space for 10 output words
+      .skip 40                         # Reserve space for 10 output words
   
   #-----------------------------------------
   .text                  # "text" section for code
