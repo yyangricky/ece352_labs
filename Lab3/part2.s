@@ -401,24 +401,43 @@ fever: j fever
 	    .global printn
     .type printn, @function
 printn:
-    addi sp, sp, -16
-    sw ra, 12(sp)
-    sw s0, 8(sp)
+    addi sp, sp, -48 # Allocate stack frame
+
+	sw a7, 44(sp) # save first 7 numbers which are in a registers into the stack frame
+	sw a6, 40(sp)
+	sw a5, 36(sp)
+	sw a4, 32(sp)
+	sw a3, 28(sp)
+	sw a2, 24(sp)
+	sw a1, 20(sp)
+
+    sw ra, 12(sp) # save return address
+    sw s0, 8(sp) # save s registers
     sw s1, 4(sp)
+	sw s2, 0(sp)
 
-    mv s0, a0
-    mv s1, zero
+    mv s0, a0 # Store char in a0 to s0
+    mv s1, zero # index tracker
+	addi s2, sp, 20 # array pointer
 
-    li t0, 0
+    li t0, 0 # load characters for comparison
     li t1, 'D'
     li t2, 'H'
     li t3, 'O'
 
 LOOP:
-    add t4, s0, s1
-    lbu t5, 0(t4)
-    beq t5, t0, END
-    beq t5, t1, DEC
+    add t4, s0, s1 # load current index for character
+    lbu t5, 0(t4) # load current character
+
+	beq t5, t0, END # check for null terminator, if so exit loop
+
+
+	slli t6, s1, 2 # multiply index by 4 to get the correct offset for the number array
+	add t6, s2, t6 # load current index for number
+	lw a0, 0(t6) # load current number to a0 for function call
+
+    
+    beq t5, t1, DEC # check against each of the three cases
     beq t5, t2, HEX
     beq t5, t3, OCT
 
@@ -435,14 +454,15 @@ DEC:
     j AFTER
 
 AFTER:
-    addi s1, s1, 1
+    addi s1, s1, 1 # increment index
     j LOOP
 
 END:
-    lw ra, 12(sp)
+    lw ra, 12(sp) # restore registers
     lw s0, 8(sp)
     lw s1, 4(sp)
-    addi sp, sp, 16
+    lw s2, 0(sp)
+    addi sp, sp, 48 # deallocate stack frame
     ret
 
     .size printn, .-printn

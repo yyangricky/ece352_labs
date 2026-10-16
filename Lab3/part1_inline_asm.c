@@ -5,12 +5,12 @@ void printHex ( int val ) { printf ("%X\n", val); }
 void printDec ( int val ) { printf ("%u\n", val); }
 
 // Inline assembly for CPUlator
-// I'm pretty sure this works
+
 __asm__(
     ".global main\n"
     "main:\n"
-    "  addi sp, sp, -16\n" // Allocate stack frame
-    "  sw ra, 12(sp)\n" // Save return address
+    "  addi sp, sp, -16\n" // allocate stack frame
+    "  sw ra, 12(sp)\n" // save return address
 
     "  li a0, 10\n" // Load argument for printOct
     "  call printOct\n"
