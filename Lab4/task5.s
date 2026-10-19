@@ -249,28 +249,8 @@ END:
 
     call moo
 
-    li a0, 2
-    call waithalfasec # wait for 1 seconds
-
-    call moo
-
-    li a0, 2
-    call waithalfasec # wait for 1 seconds
-
-    call moo
-
-    li a0, 2
-    call waithalfasec # wait for 1 seconds
-
-    call moo
-
-    li a0, 2
-    call waithalfasec # wait for 1 seconds
-
-    call moo
-
-    li a0, 2
-    call waithalfasec # wait for 1 seconds
+    li a0, 10
+    call waithalfasec # wait for 5 seconds
 
     j main # restart the game after victory
 
