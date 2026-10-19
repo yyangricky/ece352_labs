@@ -177,6 +177,8 @@ SimonMain: # a0 = seq_in, a1 = seq_n
     li a0, 0xBAD
     call HEXDISPLAY # display BAD on HEX display for game over
 
+    call scream
+
     li a0, 6
     call waithalfasec # wait for 3 seconds
 
@@ -186,6 +188,8 @@ SimonMain: # a0 = seq_in, a1 = seq_n
     SUCCESS:
     li a0, 0xFAB
     call HEXDISPLAY # display FAB on HEX display for successful round
+
+    call moo
 
     li a0, 6
     call waithalfasec # wait for 3 seconds
@@ -243,8 +247,30 @@ END:
     li a0, 0xFABFAB
     call HEXDISPLAY # display FABFAB on HEX display for victory
 
-    li a0, 10
-    call waithalfasec # wait for 5 seconds
+    call moo
+
+    li a0, 2
+    call waithalfasec # wait for 1 seconds
+
+    call moo
+
+    li a0, 2
+    call waithalfasec # wait for 1 seconds
+
+    call moo
+
+    li a0, 2
+    call waithalfasec # wait for 1 seconds
+
+    call moo
+
+    li a0, 2
+    call waithalfasec # wait for 1 seconds
+
+    call moo
+
+    li a0, 2
+    call waithalfasec # wait for 1 seconds
 
     j main # restart the game after victory
 
