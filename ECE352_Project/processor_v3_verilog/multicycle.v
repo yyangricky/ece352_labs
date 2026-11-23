@@ -51,14 +51,20 @@ wire	[1:0] R1_in;
 wire	Nwire, Zwire;
 reg		N, Z;
 
+reg [7:0] curCycleCount, lastCycleCount; // for performance counter
+
 // ------------------------ Input Assignment ------------------------ //
 assign	clock = KEY[1];
 assign	reset =  ~KEY[0]; // KEY is active high
 
 
 // ------------------- DE2 compatible HEX display ------------------- //
+wire [7:0] hex_in0;
+
+assign hex_in0 = SW[1] ? lastCycleCount : reg0; // Use SW[1] to select between cycle count and reg0 for HEX display
+
 HEXs	HEX_display(
-	.in0(reg0),.in1(reg1),.in2(reg2),.in3(reg3),.selH(SW[0]),
+	.in0(hex_in0),.in1(reg1),.in2(reg2),.in3(reg3),.selH(SW[0]),
 	.out0(HEX0),.out1(HEX1),.out2(HEX2),.out3(HEX3),
 	.out4(HEX4),.out5(HEX5)
 );
@@ -230,5 +236,18 @@ begin
       LEDR[9:0] = 10'b0;
     end
   endcase
+end
+
+// ------------------------- Performance Counter ------------------------- //
+always @(posedge clock or posedge reset) begin
+	if (reset) begin
+		curCycleCount <= 8'b0;
+		lastCycleCount <= 8'b0;
+	end else if (IRLoad) begin
+		lastCycleCount <= curCycleCount; // IRLoad indicates the start of a new instruction, so we store the last cycle count
+		curCycleCount <= 8'b1; // reset current cycle count after storing. When IRLoad = 1 we are at Cycle 1
+	end else begin
+		curCycleCount <= curCycleCount + 1;	
+	end
 end
 endmodule
