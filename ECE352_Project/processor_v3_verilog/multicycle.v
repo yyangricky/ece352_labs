@@ -51,7 +51,10 @@ wire	[1:0] R1_in;
 wire	Nwire, Zwire;
 reg		N, Z;
 
-reg [7:0] curCycleCount, lastCycleCount; // for performance counter
+wire count_en; // enables performance counter
+reg [15:0] curCycleCount; // for performance counter
+// reg [15:0] lastCycleCount; // for performance counter
+
 
 // ------------------------ Input Assignment ------------------------ //
 assign	clock = KEY[1];
@@ -59,12 +62,14 @@ assign	reset =  ~KEY[0]; // KEY is active high
 
 
 // ------------------- DE2 compatible HEX display ------------------- //
-wire [7:0] hex_in0;
+wire [7:0] hex_in0, hex_in1;
 
-assign hex_in0 = SW[1] ? lastCycleCount : reg0; // Use SW[1] to select between cycle count and reg0 for HEX display
+// assign hex_in0 = SW[2] ? lastCycleCount : reg0; // Use SW[2] to select between cycle count and reg0 for HEX display
+assign hex_in0 = SW[2] ? curCycleCount[7:0] : reg0; // Use SW[2] to select between cycle count and reg0 for HEX display
+assign hex_in1 = SW[2] ? curCycleCount[15:8] : reg1; // Use SW[2] to select between cycle count and reg1 for HEX display
 
 HEXs	HEX_display(
-	.in0(hex_in0),.in1(reg1),.in2(reg2),.in3(reg3),.selH(SW[0]),
+	.in0(hex_in0),.in1(hex_in1),.in2(reg2),.in3(reg3),.selH(SW[0]),
 	.out0(HEX0),.out1(HEX1),.out2(HEX2),.out3(HEX3),
 	.out4(HEX4),.out5(HEX5)
 );
@@ -91,7 +96,7 @@ FSM		Control(
 	.PCwrite(PCWrite),.AddrSel(AddrSel),.MemRead(MemRead),.MemWrite(MemWrite),
 	.IRload(IRLoad),.R1Sel(R1Sel),.MDRload(MDRLoad),.R1R2Load(R1R2Load),
 	.ALU1(ALU1),.ALUOutWrite(ALUOutWrite),.RFWrite(RFWrite),.RegIn(RegIn),
-	.FlagWrite(FlagWrite),.ALU2(ALU2),.ALUop(ALUOp)
+	.FlagWrite(FlagWrite),.ALU2(ALU2),.ALUop(ALUOp), .count_en(count_en)
 );
 
 memory	DataMem(
@@ -241,12 +246,11 @@ end
 // ------------------------- Performance Counter ------------------------- //
 always @(posedge clock or posedge reset) begin
 	if (reset) begin
-		curCycleCount <= 8'b0;
-		lastCycleCount <= 8'b0;
-	end else if (IRLoad) begin
-		lastCycleCount <= curCycleCount; // IRLoad indicates the start of a new instruction, so we store the last cycle count
-		curCycleCount <= 8'b1; // reset current cycle count after storing. When IRLoad = 1 we are at Cycle 1
-	end else begin
+		curCycleCount <= 16'b0;
+		// lastCycleCount <= 16'b0;
+	end else if (count_en) begin // counter enabled (IR is not STOP)
+		// lastCycleCount <= curCycleCount; // IRLoad indicates the start of a new instruction, so we store the last cycle count
+		// curCycleCount <= 16'b1; // reset current cycle count after storing. When IRLoad = 1 we are at Cycle 1
 		curCycleCount <= curCycleCount + 1;	
 	end
 end

@@ -32,6 +32,7 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 	output	PCwrite, AddrSel, MemRead, MemWrite, IRload, R1Sel, MDRload;
 	output	R1R2Load, ALU1, ALUOutWrite, RFWrite, RegIn, FlagWrite;
 	output	[2:0] ALU2, ALUop;
+	output reg count_en; // enables performance counter
 	//output	[3:0] state;
 	
 	reg [4:0]	state;
@@ -50,6 +51,7 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 	// asynchronous reset
 	always @(posedge clock or posedge reset)
 	begin
+		
 		if (reset) state = reset_s;
 		else
 		begin
@@ -89,6 +91,7 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 
 	// sets the control sequences based upon the current state and instruction
 	always @(*)
+	count_en = 1; // enable performance counter by default
 	begin
 		case (state)
 			reset_s:	//control = 19'b0000000000000000000;
@@ -144,9 +147,13 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+
+					if (instr = 8'b00000001) // STOP instruction
+						count_en = 0; // disable performance counter when STOP instruction is executed
+
 				end
 			c3_asn:		begin
-							if ( instr == 4'b0100 ) 		// add
+							if ( instr[3:0] == 4'b0100 ) 		// add
 								//control = 19'b0000000010000001001;
 							begin
 								PCwrite = 0;
@@ -165,7 +172,7 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 								RegIn = 0;
 								FlagWrite = 1;
 							end	
-							else if ( instr == 4'b0110 ) 	// sub
+							else if ( instr[3:0] == 4'b0110 ) 	// sub
 								//control = 19'b0000000010000011001;
 							begin
 								PCwrite = 0;
@@ -419,6 +426,7 @@ ALUOutWrite, RFWrite, RegIn, FlagWrite//, state
 					RFWrite = 0;
 					RegIn = 0;
 					FlagWrite = 0;
+					// count_en = 0; // disable performance counter when STOP instruction is executed
 				end
 			c3_nop: 	//control = 19'b0000000000000000000;
 				begin
